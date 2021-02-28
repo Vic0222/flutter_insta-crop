@@ -1,6 +1,6 @@
 name: flutter_insta_crop
 description: Easy to use image cropper.
-version: 0.0.1-alpha
+version: 0.0.2-alpha
 homepage: https://github.com/Vic0222/flutter_insta-crop
 repository: https://github.com/Vic0222/flutter_insta-crop
 
@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   image: ^2.1.19
+  
 
 dev_dependencies:
   flutter_test:

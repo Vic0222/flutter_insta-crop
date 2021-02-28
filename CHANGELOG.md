@@ -2,3 +2,7 @@
 
 * first release
 * todo: add test and docs
+
+## [0.0.2-alpha] - Feb 28, 2021.
+
+* added example
