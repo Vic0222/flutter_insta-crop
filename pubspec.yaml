@@ -1,8 +1,8 @@
 name: flutter_insta_crop
 description: A new Flutter package project.
 version: 0.0.1
-author: null
-homepage: null
+homepage: https://github.com/Vic0222/flutter_insta-crop
+repository: https://github.com/Vic0222/flutter_insta-crop
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
