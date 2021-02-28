@@ -73,6 +73,7 @@ class CropManager {
   double get clampVerticalPan => verticalPan.clamp(minPan, maxPan);
 
   Future<Uint8List> crop(Size widgetSize) async {
+    Uint8List ret;
     if (image != null) {
       var data = await image.toByteData(format: ImageByteFormat.png);
       var encodedImage = imagelib.decodePng(data.buffer.asUint8List());
@@ -83,8 +84,9 @@ class CropManager {
           cropWidth(widgetSize.width).toInt(),
           cropHeight(widgetSize.height).toInt());
 
-      return imagelib.encodePng(cropedImage);
+      ret = imagelib.encodePng(cropedImage);
     }
+    return ret;
   }
 
   double cropHeight(double widgetHeight) {
