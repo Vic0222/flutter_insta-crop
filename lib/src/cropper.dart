@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'crop_manager.dart';
 
 class Cropper extends StatefulWidget {
-  const Cropper({Key key, @required this.imageProvider}) : super(key: key);
+  const Cropper({Key key, @required this.imageProvider, @required this.size})
+      : super(key: key);
 
   final ImageProvider imageProvider;
+  final Size size;
 
   @override
   CropperState createState() => CropperState();
@@ -18,8 +21,6 @@ class Cropper extends StatefulWidget {
 class CropperState extends State<Cropper> with TickerProviderStateMixin, Drag {
   ImageStream _imageStream;
   ImageStreamListener _imageListener;
-
-  final _surfaceKey = GlobalKey();
 
   Tween<double> _scaleTween;
   Tween<double> _horizontalPanTween;
@@ -36,7 +37,7 @@ class CropperState extends State<Cropper> with TickerProviderStateMixin, Drag {
   double _startVerticalPan;
 
   Size get _boundaries {
-    return _surfaceKey.currentContext.size;
+    return widget.size;
   }
 
   CropManager _cropManager;
@@ -61,7 +62,6 @@ class CropperState extends State<Cropper> with TickerProviderStateMixin, Drag {
       child: ConstrainedBox(
         constraints: const BoxConstraints.expand(),
         child: GestureDetector(
-            key: _surfaceKey,
             onScaleStart: _handleScaleStart,
             onScaleUpdate: _handleScaleUpdate,
             onScaleEnd: _handleScaleEnd,
@@ -95,11 +95,15 @@ class CropperState extends State<Cropper> with TickerProviderStateMixin, Drag {
     setState(() {
       var horizontalRatio = _boundaries.width / imageInfo.image.width;
       var verticalRatio = _boundaries.height / imageInfo.image.height;
+      var ratio = max(horizontalRatio, verticalRatio);
+
       _cropManager = CropManager(
-          image: imageInfo.image,
-          scale: imageInfo.scale,
-          verticalRatio: verticalRatio,
-          horizontalRatio: horizontalRatio);
+        image: imageInfo.image,
+        scale: imageInfo.scale,
+        horizontalRatio: horizontalRatio,
+        verticalRatio: verticalRatio,
+        maxRatio: ratio,
+      );
       WidgetsBinding.instance.ensureVisualUpdate();
     });
   }
@@ -137,12 +141,12 @@ class CropperState extends State<Cropper> with TickerProviderStateMixin, Drag {
             (1.0 - details.scale) /
             (_cropManager.image.width *
                 _cropManager.scale *
-                _cropManager.verticalRatio);
+                _cropManager.maxRatio);
         final dy = _boundaries.height *
             (1.0 - details.scale) /
             (_cropManager.image.height *
                 _cropManager.scale *
-                _cropManager.verticalRatio);
+                _cropManager.maxRatio);
 
         _cropManager.horizontalPan = _startHorizontalPan + dx / 2;
         _cropManager.verticalPan = _startVerticalPan + dy / 2;

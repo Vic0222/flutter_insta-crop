@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:image/image.dart' as imagelib;
 
@@ -8,6 +9,7 @@ class CropManager {
   double scale;
   double horizontalPan;
   double verticalPan;
+  double maxRatio;
   double verticalRatio;
   double horizontalRatio;
 
@@ -24,6 +26,7 @@ class CropManager {
     this.verticalPan = 0,
     this.verticalRatio = 1,
     this.horizontalRatio = 1,
+    this.maxRatio = 1,
     this.maxPan = 0,
   });
 
@@ -31,11 +34,12 @@ class CropManager {
     if (image == null) {
       return Rect.zero;
     }
+
     return Rect.fromLTWH(
-      horizontalPan * image.width * scale * horizontalRatio,
-      verticalPan * image.height * scale * verticalRatio,
-      image.width.toDouble() * scale * horizontalRatio,
-      image.height.toDouble() * scale * verticalRatio,
+      horizontalPan * image.width * scale * maxRatio,
+      verticalPan * image.height * scale * maxRatio,
+      image.width.toDouble() * scale * maxRatio,
+      image.height.toDouble() * scale * maxRatio,
     );
   }
 
@@ -69,8 +73,24 @@ class CropManager {
 
   double get clampScale => scale.clamp(minScale, maxScale);
   double get minPan => (1 / clampScale) - 1;
-  double get clampHorizantalPan => horizontalPan.clamp(minPan, maxPan);
-  double get clampVerticalPan => verticalPan.clamp(minPan, maxPan);
+  double get clampHorizantalPan {
+    double pan = minPan;
+    if (image.width > image.height) {
+      double toSubtract = image.height / image.width / clampScale;
+      pan = toSubtract - 1;
+    }
+    return horizontalPan.clamp(pan, maxPan);
+  }
+
+  double get clampVerticalPan {
+    double pan = minPan;
+    if (image.height > image.width) {
+      double toSubtract = image.width / image.height / clampScale;
+      pan = toSubtract - 1;
+    }
+
+    return verticalPan.clamp(pan, maxPan);
+  }
 
   Future<Uint8List> crop(Size widgetSize) async {
     Uint8List ret;
@@ -90,15 +110,15 @@ class CropManager {
   }
 
   double cropHeight(double widgetHeight) {
-    return widgetHeight / scale / verticalRatio;
+    return widgetHeight / scale / maxRatio;
   }
 
   double cropWidth(double widgetWidth) {
-    return widgetWidth / scale / horizontalRatio;
+    return widgetWidth / scale / maxRatio;
   }
 
   double get cropTop {
-    final top = getDestinationRect().top / scale / verticalRatio;
+    final top = getDestinationRect().top / scale / maxRatio;
     if (top.isFinite) {
       return top * -1;
     } else {
@@ -107,7 +127,7 @@ class CropManager {
   }
 
   double get cropLeft {
-    final left = getDestinationRect().left / scale / horizontalRatio;
+    final left = getDestinationRect().left / scale / maxRatio;
     if (left.isFinite) {
       return left * -1;
     } else {
