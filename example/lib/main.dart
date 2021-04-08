@@ -46,6 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.width,
               child: Cropper(
+                size: Size(MediaQuery.of(context).size.width,
+                    MediaQuery.of(context).size.height),
                 key: _cropperKey,
                 imageProvider: NetworkImage(
                     "https://picsum.photos/1024/1024"), //provide an image
